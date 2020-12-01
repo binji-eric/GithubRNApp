@@ -1,5 +1,5 @@
 import Types from '../../action/types';
-import {LANGUAGE_FLAG} from "../../expand/dao/LanguageDao";
+import {FLAG_LANGUAGE} from "../../expand/dao/LanguageDao";
 
 const defaultState = {
     languages: [],
@@ -8,7 +8,8 @@ const defaultState = {
 export default function onAction(state = defaultState, action) {
     switch (action.type) {
         case Types.LANGUAGE_LOAD_SUCCESS://获取数据成功
-            if (LANGUAGE_FLAG.flag_key === action.flag) {
+            if (FLAG_LANGUAGE.flag_key === action.flag) {
+                console.log('language reducers->', action.languages)
                 return {
                     ...state,
                     keys: action.languages

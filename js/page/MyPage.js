@@ -7,9 +7,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import { MORE_MENU } from '../common/MORE_MENU';
 import GlobalStyles from '../share/styles/globalStyles'
 import ViewUtil from '../util/ViewUtil';
+import {FLAG_LANGUAGE } from '../expand/dao/LanguageDao'
+import {connect} from 'react-redux'
+import actions from '../action/index'
 const TitleColor = '#678';
 
-export default class MyPage extends Component {
+class MyPage extends Component {
     getLeftButton() {
         return <TouchableOpacity
                 style={{padding: 8, paddingLeft:12}}
@@ -42,6 +45,7 @@ export default class MyPage extends Component {
             </View>
     }
     onclick(menu) {
+        const {theme} = this.props 
         let RouteName, params = {};
         switch (menu) {
             case MORE_MENU.Tutorial:
@@ -52,6 +56,21 @@ export default class MyPage extends Component {
             case MORE_MENU.About:
                 RouteName = 'AboutPage';
                 break;
+            case MORE_MENU.Sort_Key:
+                RouteName = 'SortKeyPage';
+                params.flag = FLAG_LANGUAGE.flag_key;
+                break;
+            case MORE_MENU.Custom_Theme:
+                const {onShowCustomThemeView} = this.props;
+                onShowCustomThemeView(true);
+                break;
+            case MORE_MENU.Custom_Key:
+            case MORE_MENU.Custom_Language:
+            case MORE_MENU.Remove_Key:
+                RouteName = 'CustomKeyPage';
+                params.isRemoveKey = menu === MORE_MENU.Remove_Key;
+                params.flag = menu !== MORE_MENU.Custom_Language ? FLAG_LANGUAGE.flag_key : FLAG_LANGUAGE.flag_language;
+                break;
         }
         if (RouteName) {
             NavigationUtil.goPage(params, RouteName);
@@ -59,18 +78,20 @@ export default class MyPage extends Component {
     }
 
     getItem(menu) {
-        return ViewUtil.getMenuItem(()=> this.onclick(menu), menu, TitleColor)
+        const {theme} = this.props
+        return ViewUtil.getMenuItem(()=> this.onclick(menu), menu, theme.themeColor)
     }
 
     render() {
+        const {theme} = this.props
         let statusBar = {
-            backgroundColor: TitleColor,
+            backgroundColor: theme.themeColor,
             barStyle: 'light-content'
         };
         let navigationBar = <NavigationBar
             title={'我的'}
             statusBar={statusBar}
-            style={{backgroundColor: TitleColor}}
+            style={theme.styles.navBar}
             rightButton={this.getRightButton()}
             leftButton={this.getLeftButton()}
         />
@@ -88,7 +109,7 @@ export default class MyPage extends Component {
                                 size={40}
                                 style={{
                                 marginRight: 10,
-                                color: TitleColor
+                                color: theme.themeColor,
                             }}/>
                             <Text>GitHub Popular</Text>
                         </View>
@@ -98,20 +119,14 @@ export default class MyPage extends Component {
                             style={{
                                 marginRight: 10,
                                 alignSelf: 'center',
-                                color: TitleColor
+                                color: theme.themeColor,
                             }} />
                     </TouchableOpacity>
                     <View style={GlobalStyles.line}/>
                     {this.getItem(MORE_MENU.Tutorial)}
-                    <Text style={styles.groupTitle}>趋势管理</Text>
-                    {/*自定义语言*/}
-                    {this.getItem(MORE_MENU.Custom_Language)}
-                    {/*语言排序*/}
-                    <View style={GlobalStyles.line}/>
-                    {this.getItem(MORE_MENU.Sort_Language)}
-
-                    {/*最热管理*/}
-                    <Text style={styles.groupTitle}>最热管理</Text>
+                    
+                     {/*最热管理*/}
+                     <Text style={styles.groupTitle}>最热管理</Text>
                     {/*自定义标签*/}
                     {this.getItem(MORE_MENU.Custom_Key)}
                     {/*标签排序*/}
@@ -120,6 +135,14 @@ export default class MyPage extends Component {
                     {/*标签移除*/}
                     <View style={GlobalStyles.line}/>
                     {this.getItem(MORE_MENU.Remove_Key)}
+
+
+                    <Text style={styles.groupTitle}>趋势管理</Text>
+                    {/*自定义语言*/}
+                    {this.getItem(MORE_MENU.Custom_Language)}
+                    {/*语言排序*/}
+                    <View style={GlobalStyles.line}/>
+                    {this.getItem(MORE_MENU.Sort_Language)}
 
                     {/*设置*/}
                     <Text style={styles.groupTitle}>设置</Text>
@@ -138,6 +161,17 @@ export default class MyPage extends Component {
         )
     }
 }
+
+const mapStateToProps = state => ({
+    theme: state.theme.theme,
+});
+
+const mapDispatchToProps = dispatch => ({
+    onShowCustomThemeView: (show) => dispatch(actions.onShowCustomThemeView(show)),
+});
+
+//注意：connect只是个function，并不应定非要放在export后面
+export default connect(mapStateToProps, mapDispatchToProps)(MyPage);
 
 const styles = StyleSheet.create({
     container: {

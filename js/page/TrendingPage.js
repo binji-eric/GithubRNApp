@@ -15,6 +15,8 @@ import FavoriteDao from  '../expand/dao/FavoriteDao'
 import FavoriteUtil from '../util/FavoriteUtil'
 import EventBus from 'react-native-event-bus'
 import EventTypes from '../util/EventTypes'
+import {FLAG_LANGUAGE} from '../expand/dao/LanguageDao'
+import ArrayUtil from '../util/ArrayUtil'
 
 const favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 const URL = 'https://github.com/trending/';
@@ -22,24 +24,31 @@ const QUERY_STR = '?since=daily';
 const TitleColor = '#678';
 const EVENT_TYPE_TIME_SPAN_CHANGE = 'EVENT_TYPE_TIME_SPAN_CHANGE'
 
-export default class TrendingPage extends Component {
+class TrendingPage extends Component {
     constructor(props) {
         super(props);
-        this.tabNames=['Html', 'C', 'C#', 'PHP', 'JavaScript'];
+        const {onLoadLanguage} = this.props;
+        onLoadLanguage(FLAG_LANGUAGE.flag_language)
+        this.prevKeys = [];
+        // this.tabNames=['Html', 'C', 'C#', 'PHP', 'JavaScript'];
         this.state= {
             timeSpan: TimeSpans[0]
         }
     }
     _genTabs() {
-        const tabs = {};
-        this.tabNames.forEach((item, index) => {
-            tabs[`tab${index}`]={
-                screen: props => <TrendingTabPage {...props} tabLabel={item} timeSpan={this.state.timeSpan}/>,
-                navigationOptions: {
-                    title: item,
-                },
-            };
-        });
+        const tabs = {}
+        const {keys} = this.props
+        this.prevKeys = keys
+        keys.forEach((item, index) => {
+            if(item.checked) {
+                tabs[`tab${index}`]={
+                    screen: props => <TrendingTabPage {...props} timeSpan={this.state.timeSpan}  tabLabel={item.name}/>,
+                    navigationOptions: {
+                        title: item.name,
+                    },
+                };
+            }
+        })
         return tabs;
     }
     _genTitleView() {
@@ -81,7 +90,7 @@ export default class TrendingPage extends Component {
         </TrendingDialog>
     }
     _tabNav() {
-        if(!this.tabNav){
+        if(!this.tabNav || !ArrayUtil.isEqual(this.prevKeys, this.props.keys)){
             this.tabNav = createAppContainer(createMaterialTopTabNavigator(
                 this._genTabs(), //生成顶部导航
                 {
@@ -94,7 +103,8 @@ export default class TrendingPage extends Component {
                         },
                         indicatorStyle: styles.indicatorStyle,
                         labelStyle: styles.labelStyle
-                    }
+                    },
+                    lazy: true 
                 }
             ));
         } 
@@ -102,6 +112,7 @@ export default class TrendingPage extends Component {
     }
 
     render() {
+        const {keys} = this.props
         let statusBar = {
             backgroundColor: TitleColor,
             barStyle: 'light-content'
@@ -112,16 +123,28 @@ export default class TrendingPage extends Component {
             statusBar={statusBar}
             style={{backgroundColor: TitleColor}}
         />
-        const TabNavigator = this._tabNav();
+        const TabNavigator = keys.length ? this._tabNav() : null;
         return (
             <View style={styles.container}>
                 {navigationBar}
-                <TabNavigator/>
+                {TabNavigator && <TabNavigator/>}
                 {this._genTrendingDialog()}
             </View>
         );
     }
 }
+
+const mapPopularStateToProps= state => ({
+    // 从language reducer中获得的数据
+    keys: state.language.languages
+});
+const mapPopularDispatchToProps = dispatch => ({
+    onLoadLanguage: (flag) => dispatch(actions.onLoadLanguage(flag)),
+});
+
+// 将PopularTab和state树进行关联
+export default connect(mapPopularStateToProps, mapPopularDispatchToProps)(TrendingPage)
+
 
 const pageSize = 10;
 class TrendingTab extends Component {

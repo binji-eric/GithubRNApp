@@ -1,12 +1,15 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import langs from '../../share/data/langs';
-import keys from '../../share/data/keys';
+import langs from '../../share/data/langs.json';
+import keys from '../../share/data/keys.json';
 
-export const LANGUAGE_FLAG = {flag_language: 'language_dao_language', flag_key: 'language_dao_key'}
+export const FLAG_LANGUAGE = {flag_language: 'language_dao_language', flag_key: 'language_dao_key'}
+
 export default class LanguageDao {
-    constructor (flag) {
+    // 区分popular 或者 trending调用该模块
+    constructor(flag) {
         this.flag = flag;
     }
+
     /**
      * 获取语言或标签
      * @returns {Promise<any> | Promise}
@@ -19,11 +22,13 @@ export default class LanguageDao {
                     return;
                 }
                 if (!result) {
-                    let data = this.flag === LANGUAGE_FLAG.flag_language ? langs : keys;
+                    console.log('asyncStor获取失败，将从json文件中获取')
+                    let data = this.flag === FLAG_LANGUAGE.flag_language ? langs : keys;
                     this.save(data);
                     resolve(data);
                 } else {
                     try {
+                        console.log('从asyncStorage获取数据')
                         resolve(JSON.parse(result));
                     } catch (e) {
                         reject(error);
@@ -32,7 +37,8 @@ export default class LanguageDao {
             });
         });
     }
-     /**
+
+    /**
      * 保存语言或标签
      * @param objectData
      */

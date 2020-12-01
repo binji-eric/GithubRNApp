@@ -7,6 +7,8 @@ import FetchDemoPage from '../page/FetchDemoPage'
 import DataStorageDemoPage from '../page/DataStorageDemoPage'
 import WebViewPage from '../page/WebViewPage'
 import AboutPage from '../page/about/AboutPage'
+import CustomKeyPage from '../page/CustomKey'
+import SortKeyPage from '../page/SortKey'
 
 // 两部分导航，initNavigator和 mainNavigator
 const InitNavigator = createStackNavigator({
@@ -58,7 +60,19 @@ const mainNavigator = createStackNavigator({
         navigationOptions: {
             headerShown: false
         }
-    }
+    },
+    CustomKeyPage: {
+        screen: CustomKeyPage,
+        navigationOptions: {
+            headerShown: false,// 可以通过将header设为null 来禁用StackNavigator的Navigation Bar
+        },
+    },
+    SortKeyPage: {
+        screen: SortKeyPage,
+        navigationOptions: {
+            headerShown: false,// 可以通过将header设为null 来禁用StackNavigator的Navigation Bar
+        },
+    },
 });
 
 export default createAppContainer(createSwitchNavigator({
