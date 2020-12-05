@@ -2,8 +2,8 @@ import Types from '../../action/types';
 import {FLAG_LANGUAGE} from "../../expand/dao/LanguageDao";
 
 const defaultState = {
-    languages: [],
-    keys: []
+    languages: [],  // languages对应popular的标签
+    keys: []  // keys对应trending的标签
 };
 export default function onAction(state = defaultState, action) {
     switch (action.type) {

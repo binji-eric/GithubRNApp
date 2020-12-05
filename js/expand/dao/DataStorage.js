@@ -9,7 +9,7 @@ export default class DataStorage {
             return;
         AsyncStorage.setItem(url, JSON.stringify(this._wrapData(data)), callback)
     }
-
+    // 包装数据
     _wrapData (data) {
         return {data: data, timeStamp: new Date().getTime()};
     }
@@ -37,22 +37,25 @@ export default class DataStorage {
     fetchNetData(url, flag) {
         return new Promise((resolve, reject) => {
             if(flag !== FLAG_STORAGE.flag_trending) {
-            fetch(url) 
-                .then((response) => {
-                    if(response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Network response was not ok');
-                })
-                .then(responseData => {
-                    this.saveData(url, responseData)
-                    resolve(responseData)
-                }) 
-                .catch(error => {
-                    reject(error)
-                })
+                // 获取popular的内容
+                fetch(url) 
+                    .then((response) => {
+                        if(response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .then(responseData => {
+                        // 获取数据后保存到本地
+                        this.saveData(url, responseData)
+                        resolve(responseData)
+                    }) 
+                    .catch(error => {
+                        reject(error)
+                    })
             } else {
                 console.log('get data from trending github')
+                // 获取trending的内容
                 new Trending(AUTH_TOKEN).fetchTrending(url)
                     .then( items => {
                         if(!items) {
@@ -110,6 +113,7 @@ export default class DataStorage {
             return false;
         if(currentDate.getDate() != previousDate.getDate())
             return false;
+        // 超过4个小时，需要重新从网络获取数据
         if(currentDate.getHours() - previousDate.getHours() > 4) 
             return false;
         return true;

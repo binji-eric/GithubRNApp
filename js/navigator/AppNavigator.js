@@ -9,6 +9,7 @@ import WebViewPage from '../page/WebViewPage'
 import AboutPage from '../page/about/AboutPage'
 import CustomKeyPage from '../page/CustomKey'
 import SortKeyPage from '../page/SortKey'
+import SearchPage from '../page/SearchPage'
 
 // 两部分导航，initNavigator和 mainNavigator
 const InitNavigator = createStackNavigator({
@@ -73,6 +74,12 @@ const mainNavigator = createStackNavigator({
             headerShown: false,// 可以通过将header设为null 来禁用StackNavigator的Navigation Bar
         },
     },
+    SearchPage: {
+        screen: SearchPage,
+        navigationOptions: {
+            headerShown: false
+        }
+    }
 });
 
 export default createAppContainer(createSwitchNavigator({

@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-community/async-storage"
 const FAVORITE_KEY_PREFIX = 'favorite_'
 
 export default class FavoriteDao {
-    // flag标志是最热模块的收藏，还是趋势模块的收藏
+    // flag标志是来区分最热模块的收藏，还是趋势模块的收藏
     constructor(flag) {
         this.favoriteKey = FAVORITE_KEY_PREFIX +  flag
     }
@@ -72,6 +72,7 @@ export default class FavoriteDao {
     removeFavoriteItem(key) {
         AsyncStorage.removeItem(key, (err, res) => {
             if(!err) {
+                // 顺便删除key在keys中的内容
                 this.updateFavoriteKeys(key, false)
             }
         })
@@ -82,12 +83,14 @@ export default class FavoriteDao {
      */
     getAllItems() {
         return new Promise((resolve, reject) => {
+            // 获得popular或者trending页面的所有key
             this.getFavoriteKeys().then((keys) => {
                 let items = [];
                 if(keys) {
+                    // 将所有key对象的items取出
                     AsyncStorage.multiGet(keys, (err, res) => {
                         try {
-                           res.map((item, index) => {
+                           res.map((item) => {
                                let value = item[1]
                                if(value) {
                                    items.push(JSON.parse(value))

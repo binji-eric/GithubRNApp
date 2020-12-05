@@ -1,14 +1,17 @@
 import ProjectModel from '../model/ProjectModel'
-import Util from '../util/Util'
+import Util from '../util/Utils'
+
 /**
- * 
+ * 处理数据
  * @param {*} actionType 
  * @param {*} dispatch 
  * @param {*} storeName 
  * @param {*} data 
  * @param {*} pageSize 
+ * @param {*} favoriteDao 
+ * @param {其他参数} params 
  */
-export function handleData (actionType, dispatch, storeName, data, pageSize, favoriteDao) {
+export function handleData (actionType, dispatch, storeName, data, pageSize, favoriteDao, params) {
     let fixItems = [];
      if(data  && data.data) {
          if(Array.isArray(data.data)){
@@ -25,7 +28,8 @@ export function handleData (actionType, dispatch, storeName, data, pageSize, fav
             items: fixItems,
             projectModels: projectModels,
             storeName,
-            pageIndex: 1
+            pageIndex: 1,
+            ...params
         })
     })
 }
@@ -35,7 +39,9 @@ export function handleData (actionType, dispatch, storeName, data, pageSize, fav
  * @param {*} favoriteDao 
  * @param {*} callback
  */
-export async function _projectModels (showItems, favoriteDao, callback) {
+
+// 获得item 和 对应的favorite状态值
+export async function _projectModels (showItems, favoriteDao, callBack) {
     let keys = [];
     try {
         keys = await favoriteDao.getFavoriteKeys();
@@ -45,10 +51,14 @@ export async function _projectModels (showItems, favoriteDao, callback) {
     }
     let projectModels = [];
     for(let i = 0, len = showItems.length; i < len ; i++) {
-        projectModels.push(new ProjectModel(showItems[i], Util.checkFavorite(showItems[i], keys)))
-        // console.log('actionutil',showItems[i].id, projectModels[i].isFavorite, projectModels[i].item.fullName)
+        projectModels.push(new ProjectModel(showItems[i], Util.checkFavorite(showItems[i], keys)));
     }
-    if(typeof callback === 'function') {
-        callback(projectModels)
+    doCallBack(callBack, projectModels);
+}
+
+// 检查callBack的类型
+export const doCallBack = (callBack, object) => {
+    if(typeof callBack === 'function') {
+        callBack(object);
     }
 }
